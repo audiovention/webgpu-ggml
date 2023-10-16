@@ -4,7 +4,7 @@
 
 #include "ggml.h"
 
-
+#include <webgpu/webgpu.h>
 
 void print_tensor(struct ggml_tensor * tensor, const char* name) {
     printf("%s:\n", name);
@@ -34,6 +34,31 @@ void print_tensor(struct ggml_tensor * tensor, const char* name) {
 
 int main()
 {
+
+
+	// 1. We create a descriptor
+	WGPUInstanceDescriptor desc = {};
+	desc.nextInChain = nullptr;
+
+	// 2. We create the instance using this descriptor
+	WGPUInstance instance = wgpuCreateInstance(&desc);
+
+	// 3. We can check whether there is actually an instance created
+	if (!instance) {
+		std::cerr << "Could not initialize WebGPU!" << std::endl;
+		return 1;
+	}
+
+	// 4. Display the object (WGPUInstance is a simple pointer, it may be
+	// copied around without worrying about its size).
+	std::cout << "WGPU instance: " << instance << std::endl;
+
+
+
+
+
+
+
     struct ggml_init_params params = {
         .mem_size = 16 * 1024 * 1024,
         .mem_buffer = NULL,
@@ -67,6 +92,12 @@ int main()
     print_tensor(y, "y");
 
 
+
+
+
+
+	// 5. We clean up the WebGPU instance
+	wgpuInstanceRelease(instance);
 
 
     return 0;
