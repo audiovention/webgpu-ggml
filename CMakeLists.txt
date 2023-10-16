@@ -12,6 +12,7 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")
 
 set(GGML_PERF ON CACHE BOOL "enable X functionality" FORCE)
+set(GGML_WGPU ON CACHE BOOL "enable X functionality" FORCE)
 
 add_subdirectory("ggml")
 

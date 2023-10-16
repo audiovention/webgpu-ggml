@@ -3,6 +3,7 @@
 #include <random>
 
 #include "ggml.h"
+#include "ggml-backend.h"
 
 #include <webgpu/webgpu.h>
 
@@ -68,7 +69,12 @@ int main()
     // memory allocation happens here
     struct ggml_context* ctx = ggml_init(params);
 
+    // ggml_backend_t backend = NULL;
+    // backend = ggml_backend_cpu_init();
+
     struct ggml_tensor* x = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, 9);
+
+
     ggml_set_f32_1d(x, 0, 0.0001f);
     ggml_set_f32_1d(x, 1, 0.001f);
     ggml_set_f32_1d(x, 2, 0.01f);
