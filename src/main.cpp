@@ -90,30 +90,52 @@ void runOnMetal()
 #endif
 
 
+#include "ggml-wgpu.h"
+void runOnWebgpu()
+{
+    std::cout <<"Running on WebGPU" << std::endl;
+    ggml_wgpu_log_set_callback(ggml_log_callback_default, nullptr);
+
+
+    struct ggml_init_params params = {
+            .mem_size = 16 * 1024 * 1024,
+            .mem_buffer = NULL,
+        };
+
+    struct ggml_context* ctx = ggml_init(params);
+    struct ggml_tensor* x = ggml_new_tensor_1d(ctx, GGML_TYPE_F32, 5);
+    ggml_set_f32_1d(x, 0, 0.01f);
+    ggml_set_f32_1d(x, 1, 0.1f);
+    ggml_set_f32_1d(x, 2, 1.0f);
+    ggml_set_f32_1d(x, 3, 10.0f);
+    ggml_set_f32_1d(x, 4, 100.0f);
+    struct ggml_tensor* y = ggml_silu(ctx, x);
+    struct ggml_cgraph gf = ggml_build_forward(y);
+
+
+    auto ctxm = ggml_wgpu_init();
+    ggml_wgpu_add_buffer(ctxm, "base", ggml_get_mem_buffer(ctx), ggml_get_mem_size(ctx), 0);
+
+    ggml_wgpu_set_tensor(ctxm, x);
+    ggml_wgpu_graph_compute(ctxm, &gf);
+    ggml_wgpu_get_tensor(ctxm, y);
+
+    print_tensor(y, "ym");
+
+
+
+    if (ctxm) ggml_wgpu_free(ctxm);
+    if (ctx) ggml_free(ctx);
+
+}
+
 int main()
 {
 #if MY_GGML_USE_METAL
     runOnMetal();
 #endif
 
-	// 1. We create a descriptor
-	WGPUInstanceDescriptor desc = {};
-	desc.nextInChain = nullptr;
-
-	// 2. We create the instance using this descriptor
-	WGPUInstance instance = wgpuCreateInstance(&desc);
-
-	// 3. We can check whether there is actually an instance created
-	if (!instance) {
-		std::cerr << "Could not initialize WebGPU!" << std::endl;
-		return 1;
-	}
-
-	// 4. Display the object (WGPUInstance is a simple pointer, it may be
-	// copied around without worrying about its size).
-	std::cout << "WGPU instance: " << instance << std::endl;
-
-
+    runOnWebgpu();
 
 
 
@@ -152,11 +174,6 @@ int main()
 
 
 
-
-
-
-	// 5. We clean up the WebGPU instance
-	wgpuInstanceRelease(instance);
 
 
     return 0;
